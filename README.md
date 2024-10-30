@@ -1,70 +1,167 @@
-# Getting Started with Create React App
+# Website Intent Analyzer
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A web application that analyzes website content to understand visitor intent through AI-powered question generation. This tool takes a URL as input, scrapes the website content, and generates relevant multiple-choice questions to classify visitor interests.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- 🔍 Real-time website content analysis
+- 🤖 AI-powered question generation using Groq API
+- 💾 Content caching with Redis
+- 🗄️ Persistent storage with PostgreSQL
+- ⚡ Fast and responsive React frontend
 
-### `npm start`
+## Tech Stack
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### Frontend
+- React
+- Redux for state management
+- Tailwind CSS for styling
+- Lucide React for icons
+- Shadcn UI components
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### Backend
+- Python 3.x
+- Flask web framework
+- BeautifulSoup4 for web scraping
+- Groq API for AI-powered analysis
+- Redis for content caching
+- PostgreSQL for data persistence
+- SQLAlchemy ORM
+- Flask-Migrate for database migrations
 
-### `npm test`
+## Getting Started
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Prerequisites
 
-### `npm run build`
+- Python 3.x
+- Node.js and npm
+- Redis server
+- PostgreSQL database
+- Groq API key
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Environment Setup
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+1. Clone the repository:
+```bash
+git clone https://github.com/samiamjidkhan/website-intent-analyzer.git
+cd website-intent-analyzer
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+2. Set up the backend environment:
+```bash
+# Create and activate virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: .\venv\Scripts\activate
 
-### `npm run eject`
+# Install dependencies
+pip install -r requirements.txt
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+# Create .env file
+cp .env.example .env
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+3. Set up the frontend environment:
+```bash
+cd frontend
+npm install
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+4. Configure environment variables in `.env`:
+```env
+DATABASE_URL=postgresql://username:password@localhost:5432/dbname
+GROQ_API_KEY=your_groq_api_key
+REDIS_URL=redis://localhost:6379
+PORT=5001
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Running the Application
 
-## Learn More
+1. Start the Redis server:
+```bash
+redis-server
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+2. Start the backend server:
+```bash
+python app.py # Or python3 app.py
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+3. Start the frontend development server:
+```bash
+cd frontend
+npm run dev
+```
 
-### Code Splitting
+## Project Structure
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+```
+user-classifier/
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   └── URLAnalyzer.jsx
+│   │   ├── store/
+│   │   │   └── urlAnalyzerSlice.js
+|   |   |   └── store.js
+│   │   └── App.jsx
+│   └── package.json
+├── backend/
+│   ├── services/
+│   │   ├── intent_analyzer.py
+│   │   └── scraper.py
+│   ├── models/
+│   │   └── website.py
+│   ├── extensions.py
+│   └── app.py
+├── requirements.txt
+└── README.md
+```
 
-### Analyzing the Bundle Size
+## How It Works
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+1. **URL Submission**: User submits a website URL through the frontend interface.
 
-### Making a Progressive Web App
+2. **Content Scraping**: The backend scrapes the website content using BeautifulSoup4:
+   - Checks Redis cache for previously scraped content
+   - If not cached, scrapes the website and stores in Redis for 1 hour
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+3. **Intent Analysis**: 
+   - Scraped content is processed by the Groq API
+   - Generates a contextual multiple-choice question
+   - Creates 4 relevant options based on the content
 
-### Advanced Configuration
+4. **Result Storage**:
+   - Analysis results are stored in PostgreSQL
+   - Cached for 7 days to prevent redundant processing
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+5. **Response Display**:
+   - Question and options are displayed to the user
+   - Interface automatically resets after selection
 
-### Deployment
+## API Endpoints
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+### POST /analyze
+Analyzes a website and generates an intent classification question.
 
-### `npm run build` fails to minify
+**Request Body:**
+```json
+{
+    "url": "https://example.com"
+}
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+**Example response:**
+```json
+{
+    "url": "https://example.com",
+    "question": "Which product category are you interested in?",
+    "options": ["Smartphones", "Laptops", "Smart Home", "Wearables"]
+}
+```
+
+### GET /health
+Health check endpoint for monitoring service status.
+
+## Contributing
+
+Many improvements can be made with regards to scraping and generating questions. Feel free to jump in!
